@@ -37,13 +37,17 @@ fn decode_name(left) -> Result(#(String, Parameters), String) {
   })
 }
 
-fn decode_parameters(raw_parameters, dict) {
+fn decode_parameters(
+  raw_parameters: List(String),
+  dict: Parameters,
+) -> Result(Parameters, String) {
   case raw_parameters {
     [] -> Ok(dict)
-    [paramter, ..rest] -> {
+    [parameter, ..rest] -> {
       case decode_parameter(parameter) {
-        Ok(#(name, value)) -> decode_parameters(rest, dict.insert(name, value))
-        error -> error
+        Ok(#(name, value)) ->
+          decode_parameters(rest, dict.insert(dict, name, value))
+        Error(error) -> Error(error)
       }
     }
   }

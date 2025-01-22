@@ -2,6 +2,12 @@ import gleam/dict.{type Dict}
 import gleam/result
 import gleam/string
 
+const value_separator = ":"
+
+const parameter_separator = ";"
+
+const key_value_separator = "="
+
 type Parameters =
   Dict(String, String)
 
@@ -15,7 +21,7 @@ pub type DecodedProperty {
 
 pub fn decode(string) -> Result(DecodedProperty, String) {
   string
-  |> string.split_once(":")
+  |> string.split_once(value_separator)
   |> result.map_error(fn(_) { "Missing colon" })
   |> result.try(fn(result) {
     let #(left, value) = result
@@ -31,7 +37,7 @@ pub fn decode(string) -> Result(DecodedProperty, String) {
 
 fn decode_name(left) -> Result(#(String, Parameters), String) {
   left
-  |> string.split(";")
+  |> string.split(parameter_separator)
   |> default_parameters()
   |> result.try(fn(result) {
     let #(name, parameters) = result
@@ -68,7 +74,7 @@ fn decode_parameters(
 
 fn decode_parameter(parameter) -> Result(#(String, String), String) {
   parameter
-  |> string.split_once("=")
+  |> string.split_once(key_value_separator)
   |> result.map_error(fn(_) { "Invalid parameter: " <> parameter })
 }
 

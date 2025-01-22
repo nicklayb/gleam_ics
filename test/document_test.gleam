@@ -11,9 +11,11 @@ fn cases() {
     #(
       "BEGIN:VEVENT
 CLASS:PRIVATE
+UNSUPPORTED:This should be ignored
 END:VEVENT
 BEGIN:VTODO
 CLASS:PUBLIC
+DESCRIPTION:Some description
 END:VTODO",
       Ok(
         Document(
@@ -21,7 +23,11 @@ END:VTODO",
             Event(..event.new_event(), class: option.Some(class.Private)),
           ],
           todos: [
-            Todo(..todo_item.new_todo(), class: option.Some(class.Public)),
+            Todo(
+              ..todo_item.new_todo(),
+              class: option.Some(class.Public),
+              description: option.Some("Some description"),
+            ),
           ],
         ),
       ),

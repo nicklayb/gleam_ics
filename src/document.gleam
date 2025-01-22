@@ -1,14 +1,20 @@
-import event.{type Event}
+import gleam/pair
+import gleam/result
 import gleam/string
+import objects/event.{type Event}
+import objects/todo_item.{type Todo}
+import property.{type Converter}
+import skippable.{type Skippable, Failed, Skip, Success}
 
 pub type Document {
-  Document(events: List(Event))
+  Document(events: List(Event), todos: List(Todo))
 }
 
-type Skippable(a, b) {
-  Success(a)
-  Failed(b)
-  Skip
+type MutateFunction(a) =
+  fn(Document, a) -> Document
+
+type Decodable(a) {
+  Decodable(mutate: MutateFunction(a), converter: Converter(a))
 }
 
 pub fn decode(string: String) -> Result(Document, String) {
@@ -18,11 +24,15 @@ pub fn decode(string: String) -> Result(Document, String) {
 }
 
 fn new_document() {
-  Document(events: [])
+  Document(events: [], todos: [])
 }
 
 fn put_event(document, event) {
   Document(..document, events: [event, ..document.events])
+}
+
+fn put_todo(document, todo_item) {
+  Document(..document, todos: [todo_item, ..document.todos])
 }
 
 fn decode_object(lines, acc) {
@@ -32,7 +42,7 @@ fn decode_object(lines, acc) {
       case decode_object_body(object_name, rest, acc) {
         #(Skip, new_rest) -> decode_object(new_rest, acc)
         #(Success(acc), new_rest) -> decode_object(new_rest, acc)
-        #(error, _) -> error
+        #(Failed(error), _) -> Error(error)
       }
     }
     [unexpected, ..] -> Error("Unexpected " <> unexpected)
@@ -46,13 +56,35 @@ fn decode_object_body(
 ) -> #(Skippable(Document, String), List(String)) {
   case object_name {
     "VEVENT" -> {
-      case event.decode(rest) {
-        #(Ok(event), new_rest) -> #(Success(put_event(acc, event)), new_rest)
-        #(Error(error), new_rest) -> #(Failed(error), new_rest)
-      }
+      decode_item(
+        acc,
+        rest,
+        object_name,
+        Decodable(converter: event.converter(), mutate: put_event),
+      )
+    }
+    "VTODO" -> {
+      decode_item(
+        acc,
+        rest,
+        object_name,
+        Decodable(converter: todo_item.converter(), mutate: put_todo),
+      )
     }
     _ -> #(Skip, drop_until_end(object_name, rest))
   }
+}
+
+fn decode_item(document, lines, object_key, decodable) {
+  let Decodable(mutate: mutate, converter: converter) = decodable
+
+  lines
+  |> property.decode_properties(object_key, converter)
+  |> pair.map_first(fn(skippable) {
+    skippable
+    |> result.map(fn(item) { mutate(document, item) })
+    |> skippable.from_result()
+  })
 }
 
 fn drop_until_end(object_name, lines) {

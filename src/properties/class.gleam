@@ -1,6 +1,6 @@
+import data_types/iana.{type IanaToken}
+import data_types/xname.{type XName}
 import gleam/option.{type Option, None, Some}
-import iana.{type IanaToken}
-import xname.{type XName}
 
 pub type Class {
   Private

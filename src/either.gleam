@@ -1,4 +1,4 @@
-import gleam/option.{type Option, None, Some}
+import gleam/option.{type Option}
 
 pub type Either(a, b) {
   Left(a)

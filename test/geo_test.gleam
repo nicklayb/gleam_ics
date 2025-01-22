@@ -1,7 +1,7 @@
-import geo
 import gleam/list
 import gleam/option.{None, Some}
 import gleeunit/should
+import properties/geo
 
 const cases = [
   #("123,32112;3432,231", Some(geo.Geo(123.32112, 3432.231))),

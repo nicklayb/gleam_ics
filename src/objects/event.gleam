@@ -25,12 +25,11 @@
 //
 
 import birl.{type Time}
-import class.{type Class}
-import geo.{type Geo}
-import gleam/list
-import gleam/option.{type Option, None, Some}
-import location.{type Location}
-import property
+import gleam/option.{type Option, None}
+import properties/class.{type Class}
+import properties/geo.{type Geo}
+import properties/location.{type Location}
+import property.{Converter, DecodedProperty}
 
 type DateTime =
   Time
@@ -71,22 +70,18 @@ pub fn new_event() -> Event {
   )
 }
 
-pub fn decode(lines: List(String)) -> #(Result(Event, String), List(String)) {
-  decode_lines(lines, new_event())
+pub fn converter() {
+  Converter(object: new_event(), apply: apply_property)
 }
 
-fn decode_lines(lines, event) {
-  case lines {
-    ["END:VEVENT", ..rest] -> #(Ok(event), rest)
-    [line, ..rest] -> {
-      line
-      |> property.decode()
-      |> result.map(fn(decoded) {
-        let event = apply_property(event, decoded)
-
-        decode_lines(rest, event)
-      })
-    }
-    [] -> #(Ok(event), [])
+fn apply_property(event, decoded) {
+  case decoded {
+    DecodedProperty(name: "CLASS", parameters: _, value: value) ->
+      put_class(event, value)
+    _ -> event
   }
+}
+
+fn put_class(event, string) {
+  Event(..event, class: class.decode(string))
 }

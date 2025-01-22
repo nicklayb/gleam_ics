@@ -5,6 +5,10 @@ import gleam/string
 type Parameters =
   Dict(String, String)
 
+pub type Converter(a) {
+  Converter(object: a, apply: fn(a, DecodedProperty) -> a)
+}
+
 pub type DecodedProperty {
   DecodedProperty(name: String, parameters: Parameters, value: String)
 }
@@ -12,6 +16,7 @@ pub type DecodedProperty {
 pub fn decode(string) -> Result(DecodedProperty, String) {
   string
   |> string.split_once(":")
+  |> result.map_error(fn(_) { "Missing colon" })
   |> result.try(fn(result) {
     let #(left, value) = result
     left
@@ -26,15 +31,23 @@ pub fn decode(string) -> Result(DecodedProperty, String) {
 
 fn decode_name(left) -> Result(#(String, Parameters), String) {
   left
-  |> string.split_once(";")
+  |> string.split(";")
+  |> default_parameters()
   |> result.try(fn(result) {
     let #(name, parameters) = result
 
     parameters
-    |> string.split(";")
     |> decode_parameters(dict.new())
     |> result.map(fn(parameters) { #(name, parameters) })
   })
+}
+
+fn default_parameters(parameters) {
+  case parameters {
+    [name] -> Ok(#(name, []))
+    [name, ..rest] -> Ok(#(name, rest))
+    _ -> Error("Expected a name with optional parameters")
+  }
 }
 
 fn decode_parameters(
@@ -57,4 +70,27 @@ fn decode_parameter(parameter) -> Result(#(String, String), String) {
   parameter
   |> string.split_once("=")
   |> result.map_error(fn(_) { "Invalid parameter: " <> parameter })
+}
+
+pub fn decode_properties(lines, object_key, converter) {
+  let Converter(object: object, apply: apply_property) = converter
+
+  case lines {
+    ["END:" <> key, ..rest] if key == object_key -> #(Ok(object), rest)
+    [line, ..rest] -> {
+      case decode(line) {
+        Ok(decoded) -> {
+          let object = apply_property(object, decoded)
+
+          decode_properties(
+            rest,
+            object_key,
+            Converter(..converter, object: object),
+          )
+        }
+        Error(error) -> #(Error(error), rest)
+      }
+    }
+    [] -> #(Ok(object), [])
+  }
 }

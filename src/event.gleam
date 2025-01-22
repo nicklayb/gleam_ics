@@ -27,8 +27,10 @@
 import birl.{type Time}
 import class.{type Class}
 import geo.{type Geo}
-import gleam/option.{type Option}
+import gleam/list
+import gleam/option.{type Option, None, Some}
 import location.{type Location}
+import property
 
 type DateTime =
   Time
@@ -50,6 +52,41 @@ pub type Event {
     created: Option(DateTime),
     start_date: Option(DateTime),
     last_modified: Option(DateTime),
-    location: Location,
+    location: Option(Location),
   )
+}
+
+pub fn new_event() -> Event {
+  Event(
+    class: None,
+    description: None,
+    geo: None,
+    end: None,
+    priority: None,
+    status: None,
+    created: None,
+    start_date: None,
+    last_modified: None,
+    location: None,
+  )
+}
+
+pub fn decode(lines: List(String)) -> #(Result(Event, String), List(String)) {
+  decode_lines(lines, new_event())
+}
+
+fn decode_lines(lines, event) {
+  case lines {
+    ["END:VEVENT", ..rest] -> #(Ok(event), rest)
+    [line, ..rest] -> {
+      line
+      |> property.decode()
+      |> result.map(fn(decoded) {
+        let event = apply_property(event, decoded)
+
+        decode_lines(rest, event)
+      })
+    }
+    [] -> #(Ok(event), [])
+  }
 }

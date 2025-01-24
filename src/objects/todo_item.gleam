@@ -20,14 +20,14 @@ fn apply_property(event, decoded) {
       put_class(event, value)
     DecodedProperty(name: "DESCRIPTION", parameters: _, value: value) ->
       put_description(event, value)
-    _ -> event
+    _ -> Ok(event)
   }
 }
 
 fn put_class(todo_item, string) {
-  Todo(..todo_item, class: class.decode(string))
+  Ok(Todo(..todo_item, class: class.decode(string)))
 }
 
 fn put_description(todo_item, string) {
-  Todo(..todo_item, description: Some(string))
+  Ok(Todo(..todo_item, description: Some(string)))
 }

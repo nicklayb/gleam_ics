@@ -1,15 +1,16 @@
 import gleam/dict
 import gleam/list
+import gleam/option
 import gleeunit/should
 import properties/date
 
 const decode_cases = [
-  #("20250101", Ok(date.Date(year: 2025, month: 1, day: 1))),
+  #("21120101", Ok(date.Date(year: 2112, month: 1, day: 1))),
   #(
-    "20250101T024335Z",
+    "21120101T024335Z",
     Ok(
       date.DateTime(
-        year: 2025,
+        year: 2112,
         month: 1,
         day: 1,
         hour: 2,
@@ -19,11 +20,11 @@ const decode_cases = [
     ),
   ),
   #(
-    "20250102X024335",
-    Error("Unable to parse 20250102X024335 as date or date time"),
+    "21120102X024335",
+    Error("Unable to parse 21120102X024335 as date or date time"),
   ),
-  #("2025011", Error("Unable to parse 2025011 as date or date time")),
-  #("20250110D", Error("Unable to parse 20250110D as date or date time")),
+  #("2112011", Error("Unable to parse 2112011 as date or date time")),
+  #("21120110D", Error("Unable to parse 21120110D as date or date time")),
 ]
 
 pub fn decode_test() {
@@ -36,25 +37,64 @@ pub fn decode_test() {
 }
 
 const decode_with_parameters_cases = [
-  #(#("20250101", "DATE"), Ok(date.Date(2025, 01, 01))),
   #(
-    #("20250101T012343Z", "DATE-TIME"),
-    Ok(date.DateTime(2025, 01, 01, 1, 23, 43)),
+    #("21120101", option.Some("DATE")),
+    Ok(date.Date(year: 2112, month: 01, day: 01)),
   ),
   #(
-    #("20250101", "DATE-TIME"),
-    Error("Invalid date format, expected YYYYMMDDHHMMSS, got: 20250101"),
+    #("21120101T012343Z", option.Some("DATE-TIME")),
+    Ok(
+      date.DateTime(
+        year: 2112,
+        month: 01,
+        day: 01,
+        hour: 1,
+        minute: 23,
+        second: 43,
+      ),
+    ),
   ),
   #(
-    #("20250101T012332Z", "DATE"),
-    Error("Invalid date format, expected YYYYMMDD, got: 20250101T012332Z"),
+    #("21120101", option.Some("DATE-TIME")),
+    Error("Invalid date format, expected YYYYMMDDHHMMSS, got: 21120101"),
+  ),
+  #(
+    #("21120101T012332Z", option.Some("DATE")),
+    Error("Invalid date format, expected YYYYMMDD, got: 21120101T012332Z"),
+  ),
+  #(
+    #("21120101", option.Some("XANADU")),
+    Error(
+      "Invalid VALUE parameter, expected one of DATE or DATE-TIME, got: XANADU",
+    ),
+  ),
+  #(
+    #("21120101", option.Some("")),
+    Error("Invalid VALUE parameter, expected one of DATE or DATE-TIME, got: "),
+  ),
+  #(
+    #("21120101T012343Z", option.None),
+    Ok(
+      date.DateTime(
+        year: 2112,
+        month: 01,
+        day: 01,
+        hour: 1,
+        minute: 23,
+        second: 43,
+      ),
+    ),
   ),
 ]
 
 pub fn decode_with_parameters_test() {
   list.each(decode_with_parameters_cases, fn(test_case) {
     let #(#(input, parameter_value), output) = test_case
-    let parameters = dict.from_list([#("VALUE", parameter_value)])
+    let parameters = case parameter_value {
+      option.Some(value) -> dict.from_list([#("VALUE", value)])
+      _ -> dict.new()
+    }
+
     input
     |> date.decode_with_parameters(parameters)
     |> should.equal(output)

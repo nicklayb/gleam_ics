@@ -1,6 +1,5 @@
 import gleam/dict
 import gleam/int
-import gleam/io
 import gleam/option.{Some}
 import gleam/regexp
 import gleam/result

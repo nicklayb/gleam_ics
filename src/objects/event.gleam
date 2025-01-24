@@ -3,7 +3,6 @@
 //  ; the following are optional,
 //                 ; but MUST NOT occur more than once
 //
-//                 class / created / description / dtstart / geo /
 //                 last-mod / location / organizer / priority /
 //                 dtstamp / seq / status / summary / transp /
 //                 uid / url / recurid /
@@ -52,9 +51,9 @@ pub type Event {
     status: Option(EventStatus),
     organizer: Option(CalAddress),
     sequence: Option(Int),
+    start_date: Option(Date),
     // to validate
     created: Option(Date),
-    start_date: Option(Date),
     last_modified: Option(Date),
     location: Option(Location),
     transparency: Option(Transparency),
@@ -102,8 +101,30 @@ fn apply_property(event, decoded) {
     "SEQUENCE" -> Ok(Event(..event, sequence: primitive.decode_int(value)))
     "PRIORITY" -> Ok(Event(..event, priority: primitive.decode_int(value)))
     "TRANSP" -> Ok(Event(..event, transparency: transparency.decode(value)))
+    "GEO" -> Ok(Event(..event, geo: geo.decode(value)))
     "UID" -> Ok(Event(..event, uid: Some(value)))
     "URL" -> Ok(Event(..event, url: option.from_result(uri.parse(value))))
+    "LAST-MODIFIED" ->
+      Ok(
+        Event(
+          ..event,
+          last_modified: option.from_result(date.decode_date_time(value)),
+        ),
+      )
+    "DTSTAMP" ->
+      Ok(
+        Event(
+          ..event,
+          timestamp: option.from_result(date.decode_date_time(value)),
+        ),
+      )
+    "CREATED" ->
+      Ok(
+        Event(
+          ..event,
+          created: option.from_result(date.decode_date_time(value)),
+        ),
+      )
     "DTSTART" ->
       Ok(
         Event(

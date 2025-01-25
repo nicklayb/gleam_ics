@@ -2,7 +2,7 @@ import gleam/dict
 import gleam/list
 import gleam/option
 import gleeunit/should
-import property/date
+import property/date.{Floating, UTC}
 
 const decode_cases = [
   #("21120101", Ok(date.Date(year: 2112, month: 1, day: 1))),
@@ -16,6 +16,21 @@ const decode_cases = [
         hour: 2,
         minute: 43,
         second: 35,
+        tz: UTC,
+      ),
+    ),
+  ),
+  #(
+    "21120101T024335",
+    Ok(
+      date.DateTime(
+        year: 2112,
+        month: 1,
+        day: 1,
+        hour: 2,
+        minute: 43,
+        second: 35,
+        tz: Floating,
       ),
     ),
   ),
@@ -51,6 +66,7 @@ const decode_with_parameters_cases = [
         hour: 1,
         minute: 23,
         second: 43,
+        tz: UTC,
       ),
     ),
   ),
@@ -82,6 +98,7 @@ const decode_with_parameters_cases = [
         hour: 1,
         minute: 23,
         second: 43,
+        tz: UTC,
       ),
     ),
   ),

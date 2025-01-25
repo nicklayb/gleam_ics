@@ -1,5 +1,6 @@
 import gleam/dict
 import gleam/int
+import gleam/io
 import gleam/option.{Some}
 import gleam/regexp
 import gleam/result
@@ -7,11 +8,35 @@ import property
 
 const date_regexp = "^([0-9]{4})([0-9]{2})([0-9]{2})$"
 
-const date_time_regexp = "^([0-9]{4})([0-9]{2})([0-9]{2})T([0-9]{2})([0-9]{2})([0-9]{2})Z$"
+const date_time_regexp = "^([0-9]{4})([0-9]{2})([0-9]{2})T([0-9]{2})([0-9]{2})([0-9]{2})(Z)?$"
+
+pub type IdentifierSign {
+  Plus
+  Minus
+}
+
+pub type TimeZoneIdentifier {
+  Offset(sign: IdentifierSign, hour: Int, minute: Int)
+  Id(String)
+}
+
+pub type TimeZone {
+  UTC
+  Local(TimeZoneIdentifier)
+  Floating
+}
 
 pub type Date {
   Date(year: Int, month: Int, day: Int)
-  DateTime(year: Int, month: Int, day: Int, hour: Int, minute: Int, second: Int)
+  DateTime(
+    year: Int,
+    month: Int,
+    day: Int,
+    hour: Int,
+    minute: Int,
+    second: Int,
+    tz: TimeZone,
+  )
 }
 
 pub fn decode(string) {
@@ -63,6 +88,7 @@ pub fn decode_date_time(string) {
           Some(hour),
           Some(minute),
           Some(second),
+          ..rest
         ],
         ..,
       ),
@@ -73,6 +99,10 @@ pub fn decode_date_time(string) {
       let assert Ok(hour) = int.parse(hour)
       let assert Ok(minute) = int.parse(minute)
       let assert Ok(second) = int.parse(second)
+      let timezone = case rest {
+        [Some("Z")] -> UTC
+        _ -> Floating
+      }
 
       Ok(DateTime(
         year: year,
@@ -81,6 +111,7 @@ pub fn decode_date_time(string) {
         hour: hour,
         minute: minute,
         second: second,
+        tz: timezone,
       ))
     }
     _ -> {

@@ -49,6 +49,7 @@ fn cases() {
                   hour: 2,
                   minute: 40,
                   second: 54,
+                  tz: date.UTC,
                 )),
                 timestamp: option.Some(date.DateTime(
                   year: 2022,
@@ -57,6 +58,7 @@ fn cases() {
                   hour: 10,
                   minute: 30,
                   second: 20,
+                  tz: date.Floating,
                 )),
                 created: option.Some(date.DateTime(
                   year: 2025,
@@ -65,6 +67,7 @@ fn cases() {
                   hour: 11,
                   minute: 32,
                   second: 21,
+                  tz: date.UTC,
                 )),
                 last_modified: option.Some(date.DateTime(
                   year: 2025,
@@ -73,6 +76,7 @@ fn cases() {
                   hour: 1,
                   minute: 2,
                   second: 1,
+                  tz: date.UTC,
                 )),
               ),
             ],

@@ -1,5 +1,5 @@
-import data_types/iana.{type IanaToken}
-import data_types/xname.{type XName}
+import data_type/iana.{type IanaToken}
+import data_type/xname.{type XName}
 import gleam/option.{type Option, None, Some}
 
 pub type Class {

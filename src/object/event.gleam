@@ -25,15 +25,16 @@
 
 import gleam/option.{type Option, None, Some}
 import gleam/uri.{type Uri}
-import properties/cal_address.{type CalAddress}
-import properties/class.{type Class}
-import properties/date.{type Date}
-import properties/geo.{type Geo}
-import properties/location.{type Location}
-import properties/primitive
-import properties/status/event.{type Status as EventStatus} as event_status
-import properties/transparency.{type Transparency}
-import property.{Converter, DecodedProperty}
+import object.{Converter}
+import property.{DecodedProperty}
+import property/cal_address.{type CalAddress}
+import property/class.{type Class}
+import property/date.{type Date}
+import property/geo.{type Geo}
+import property/location.{type Location}
+import property/primitive
+import property/status/event.{type Status as EventStatus} as event_status
+import property/transparency.{type Transparency}
 
 pub type End {
   DatetimeEnd(Date)
@@ -91,42 +92,53 @@ pub fn converter() {
   Converter(object: new(), apply: apply_property)
 }
 
-fn apply_property(event, decoded) {
+fn apply_property(event, rest_lines, decoded) {
   let DecodedProperty(name: name, parameters: parameters, value: value) =
     decoded
   case name {
-    "CLASS" -> Ok(Event(..event, class: class.decode(value)))
-    "DESCRIPTION" -> Ok(Event(..event, description: Some(value)))
-    "STATUS" -> Ok(Event(..event, status: event_status.decode(value)))
-    "SEQUENCE" -> Ok(Event(..event, sequence: primitive.decode_int(value)))
-    "PRIORITY" -> Ok(Event(..event, priority: primitive.decode_int(value)))
-    "TRANSP" -> Ok(Event(..event, transparency: transparency.decode(value)))
-    "GEO" -> Ok(Event(..event, geo: geo.decode(value)))
-    "UID" -> Ok(Event(..event, uid: Some(value)))
-    "URL" -> Ok(Event(..event, url: option.from_result(uri.parse(value))))
+    "CLASS" -> Ok(#(Event(..event, class: class.decode(value)), rest_lines))
+    "DESCRIPTION" -> Ok(#(Event(..event, description: Some(value)), rest_lines))
+    "STATUS" ->
+      Ok(#(Event(..event, status: event_status.decode(value)), rest_lines))
+    "SEQUENCE" ->
+      Ok(#(Event(..event, sequence: primitive.decode_int(value)), rest_lines))
+    "PRIORITY" ->
+      Ok(#(Event(..event, priority: primitive.decode_int(value)), rest_lines))
+    "TRANSP" ->
+      Ok(#(Event(..event, transparency: transparency.decode(value)), rest_lines))
+    "GEO" -> Ok(#(Event(..event, geo: geo.decode(value)), rest_lines))
+    "UID" -> Ok(#(Event(..event, uid: Some(value)), rest_lines))
+    "URL" ->
+      Ok(#(
+        Event(..event, url: option.from_result(uri.parse(value))),
+        rest_lines,
+      ))
     "LAST-MODIFIED" ->
-      Ok(
+      Ok(#(
         Event(
           ..event,
           last_modified: option.from_result(date.decode_date_time(value)),
         ),
-      )
+        rest_lines,
+      ))
     "DTSTAMP" ->
-      Ok(
+      Ok(#(
         Event(
           ..event,
           timestamp: option.from_result(date.decode_date_time(value)),
         ),
-      )
+        rest_lines,
+      ))
     "CREATED" ->
-      Ok(
+      Ok(#(
         Event(
           ..event,
           created: option.from_result(date.decode_date_time(value)),
         ),
-      )
+        rest_lines,
+      ))
     "DTSTART" ->
-      Ok(
+      Ok(#(
         Event(
           ..event,
           start_date: option.from_result(date.decode_with_parameters(
@@ -134,11 +146,13 @@ fn apply_property(event, decoded) {
             parameters,
           )),
         ),
-      )
+        rest_lines,
+      ))
     "ORGANIZER" ->
-      Ok(
+      Ok(#(
         Event(..event, organizer: option.from_result(cal_address.decode(value))),
-      )
-    _ -> Ok(event)
+        rest_lines,
+      ))
+    _ -> Ok(#(event, rest_lines))
   }
 }

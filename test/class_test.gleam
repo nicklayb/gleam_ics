@@ -1,9 +1,9 @@
-import data_types/iana
-import data_types/xname
+import data_type/iana
+import data_type/xname
 import gleam/list
 import gleam/option.{None, Some}
 import gleeunit/should
-import properties/class
+import property/class
 
 const cases = [
   #("PRIVATE", Some(class.Private)),

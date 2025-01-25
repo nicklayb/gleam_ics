@@ -11,10 +11,6 @@ const key_value_separator = "="
 pub type Parameters =
   Dict(String, String)
 
-pub type Converter(a) {
-  Converter(object: a, apply: fn(a, DecodedProperty) -> Result(a, String))
-}
-
 pub type DecodedProperty {
   DecodedProperty(name: String, parameters: Parameters, value: String)
 }
@@ -76,30 +72,4 @@ fn decode_parameter(parameter) -> Result(#(String, String), String) {
   parameter
   |> string.split_once(key_value_separator)
   |> result.map_error(fn(_) { "Invalid parameter: " <> parameter })
-}
-
-pub fn decode_properties(lines, object_key, converter) {
-  let Converter(object: object, apply: apply_property) = converter
-
-  case lines {
-    ["END:" <> key, ..rest] if key == object_key -> #(Ok(object), rest)
-    [line, ..rest] -> {
-      case decode(line) {
-        Ok(decoded) -> {
-          case apply_property(object, decoded) {
-            Ok(updated_object) -> {
-              decode_properties(
-                rest,
-                object_key,
-                Converter(..converter, object: updated_object),
-              )
-            }
-            Error(error) -> #(Error(error), rest)
-          }
-        }
-        Error(error) -> #(Error(error), rest)
-      }
-    }
-    [] -> #(Ok(object), [])
-  }
 }

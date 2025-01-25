@@ -2,7 +2,7 @@ import gleam/dict
 import gleam/list
 import gleam/option
 import gleeunit/should
-import properties/date
+import property/date
 
 const decode_cases = [
   #("21120101", Ok(date.Date(year: 2112, month: 1, day: 1))),

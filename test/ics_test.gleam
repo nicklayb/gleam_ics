@@ -1,3 +1,5 @@
+import data_type
+import gleam/dict
 import gleam/list
 import gleam/option
 import gleam/uri
@@ -7,6 +9,8 @@ import ics
 import object/calendar.{Calendar}
 import object/document.{Document}
 import object/event.{Event}
+import object/timezone.{Timezone}
+import object/timezone/saving.{Saving}
 import object/todo_item.{Todo}
 import property/cal_address
 import property/class
@@ -29,6 +33,48 @@ fn cases() {
         Document(calendars: [
           Calendar(
             version: option.Some("2.0"),
+            timezones: dict.from_list([
+              #(
+                "America/Montreal",
+                Timezone(
+                  id: option.Some("America/Montreal"),
+                  standard: option.Some(Saving(
+                    start: option.Some(date.DateTime(
+                      year: 2025,
+                      month: 4,
+                      day: 2,
+                      hour: 11,
+                      minute: 32,
+                      second: 21,
+                      tz: date.UTC,
+                    )),
+                    offset_to: option.Some(data_type.Offset(
+                      sign: data_type.Plus,
+                      hour: 3,
+                      minute: 0,
+                    )),
+                    offset_from: option.None,
+                  )),
+                  daylight: option.Some(Saving(
+                    start: option.Some(date.DateTime(
+                      year: 2020,
+                      month: 2,
+                      day: 1,
+                      hour: 10,
+                      minute: 30,
+                      second: 21,
+                      tz: date.UTC,
+                    )),
+                    offset_to: option.None,
+                    offset_from: option.Some(data_type.Offset(
+                      sign: data_type.Minus,
+                      hour: 12,
+                      minute: 0,
+                    )),
+                  )),
+                ),
+              ),
+            ]),
             events: [
               Event(
                 ..event.new(),

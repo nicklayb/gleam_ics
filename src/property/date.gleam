@@ -1,6 +1,5 @@
 import gleam/dict
 import gleam/int
-import gleam/io
 import gleam/option.{Some}
 import gleam/regexp
 import gleam/result
@@ -10,19 +9,9 @@ const date_regexp = "^([0-9]{4})([0-9]{2})([0-9]{2})$"
 
 const date_time_regexp = "^([0-9]{4})([0-9]{2})([0-9]{2})T([0-9]{2})([0-9]{2})([0-9]{2})(Z)?$"
 
-pub type IdentifierSign {
-  Plus
-  Minus
-}
-
-pub type TimeZoneIdentifier {
-  Offset(sign: IdentifierSign, hour: Int, minute: Int)
-  Id(String)
-}
-
 pub type TimeZone {
   UTC
-  Local(TimeZoneIdentifier)
+  Local(String)
   Floating
 }
 

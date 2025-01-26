@@ -26,6 +26,13 @@ pub fn update_object(converter: Converter(object), object: object) {
   Converter(..converter, object: object)
 }
 
+pub fn flip_result(result) {
+  case result {
+    #(Ok(object), rest_lines) -> Ok(#(object, rest_lines))
+    #(Error(error), _) -> Error(error)
+  }
+}
+
 pub fn decode(
   parent: parent,
   lines: List(String),
@@ -69,5 +76,17 @@ pub fn decode_properties(
       }
     }
     [] -> #(Ok(object), [])
+  }
+}
+
+pub fn map_property_from_result(
+  object: object,
+  mutate: fn(object, item) -> object,
+  result: Result(item, String),
+  rest_lines,
+) {
+  case result {
+    Ok(item) -> Ok(#(mutate(object, item), rest_lines))
+    Error(error) -> Error(error)
   }
 }

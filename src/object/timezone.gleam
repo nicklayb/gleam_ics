@@ -1,7 +1,6 @@
 import gleam/option.{type Option, None, Some}
 import object.{Converter, Decodable}
 
-// import object/timezone/daylight.{type Daylight}
 import object/timezone/saving.{type Saving}
 import property.{DecodedProperty}
 
@@ -30,17 +29,13 @@ pub fn converter() {
 }
 
 fn decode_saving(timezone, rest_lines, mutate, saving) {
-  case
-    object.decode(
-      timezone,
-      rest_lines,
-      saving,
-      Decodable(mutate: mutate, converter: saving.converter()),
-    )
-  {
-    #(Ok(timezone), rest_lines) -> Ok(#(timezone, rest_lines))
-    #(Error(error), _) -> Error(error)
-  }
+  timezone
+  |> object.decode(
+    rest_lines,
+    saving,
+    Decodable(mutate: mutate, converter: saving.converter()),
+  )
+  |> object.flip_result()
 }
 
 fn apply_property(timezone, rest_lines, decoded) {

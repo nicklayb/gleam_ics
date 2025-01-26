@@ -4,6 +4,18 @@ import object.{Converter}
 import property.{DecodedProperty}
 import property/date.{type Date}
 
+//
+// ; the following are each REQUIRED,
+// ; but MUST NOT occur more than once
+//
+// dtstart / tzoffsetto / tzoffsetfrom /
+//
+// ; the following are optional,
+// ; and MAY occur more than once
+//
+// comment / rdate / rrule / tzname / x-prop
+//
+// )
 pub type Saving {
   Saving(
     start: Option(Date),

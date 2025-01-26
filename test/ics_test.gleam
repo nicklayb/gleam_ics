@@ -1,4 +1,5 @@
 import data_type
+import data_type/iana
 import gleam/dict
 import gleam/list
 import gleam/option
@@ -13,6 +14,7 @@ import object/timezone.{Timezone}
 import object/timezone/saving.{Saving}
 import object/todo_item.{Todo}
 import property/cal_address
+import property/calendar_scale
 import property/class
 import property/date
 import property/geo
@@ -33,6 +35,9 @@ fn cases() {
         Document(calendars: [
           Calendar(
             version: option.Some("2.0"),
+            method: option.Some(iana.IanaToken("REQUEST")),
+            product_id: option.Some("Product ID"),
+            scale: option.Some(calendar_scale.Gregorian),
             timezones: dict.from_list([
               #(
                 "America/Montreal",

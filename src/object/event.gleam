@@ -92,7 +92,6 @@ pub fn converter() {
   Converter(object: new(), apply: apply_property)
 }
 
-//                 dtend / duration /
 fn apply_property(event, rest_lines, decoded) {
   let DecodedProperty(name: name, parameters: parameters, value: value) =
     decoded

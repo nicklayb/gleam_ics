@@ -26,10 +26,10 @@ fn apply_property(document, rest_lines, decoded) {
       document
       |> object.decode(
         rest_lines,
-        "VCALENDAR",
+        value,
         Decodable(mutate: put_calendar, converter: calendar.converter()),
       )
-      |> flip_result()
+      |> object.flip_result()
     }
     _, _ -> Ok(#(document, drop_until_end("VCALENDAR", rest_lines)))
   }
@@ -40,12 +40,5 @@ fn drop_until_end(object_name, lines) {
     ["END:" <> name, ..rest] if object_name == name -> rest
     [_, ..rest] -> drop_until_end(object_name, rest)
     [] -> []
-  }
-}
-
-fn flip_result(result) {
-  case result {
-    #(Ok(success), rest_lines) -> Ok(#(success, rest_lines))
-    #(Error(error), _) -> Error(error)
   }
 }

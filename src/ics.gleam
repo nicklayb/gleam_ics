@@ -1,3 +1,4 @@
+import gleam/result
 import gleam/string
 import object.{Converter}
 import object/document.{type Document}
@@ -15,19 +16,16 @@ fn decode_document(lines, converter) {
     [] -> Ok(document)
     ["", ..rest] -> decode_document(rest, converter)
     [line, ..rest] -> {
-      case property.decode(line) {
-        Ok(decoded) -> {
-          case apply_property(document, rest, decoded) {
-            Ok(#(document, rest_lines)) ->
-              decode_document(
-                rest_lines,
-                object.update_object(converter, document),
-              )
-            Error(error) -> Error(error)
-          }
-        }
-        Error(error) -> Error(error)
-      }
+      line
+      |> property.decode()
+      |> result.try(fn(decoded) {
+        document
+        |> apply_property(rest, decoded)
+        |> result.try(fn(result) {
+          let #(document, rest_lines) = result
+          decode_document(rest_lines, object.update_object(converter, document))
+        })
+      })
     }
   }
 }

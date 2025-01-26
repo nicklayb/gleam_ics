@@ -5,16 +5,6 @@ import gleam/option
 import gleam/regexp
 import gleam/string
 
-// dur-value  = (["+"] / "-") "P" (dur-date / dur-time / dur-week)
-//
-// dur-date   = dur-day [dur-time]
-// dur-time   = "T" (dur-hour / dur-minute / dur-second)
-// dur-week   = 1*DIGIT "W"
-// dur-hour   = 1*DIGIT "H" [dur-minute]
-// dur-minute = 1*DIGIT "M" [dur-second]
-// dur-second = 1*DIGIT "S"
-// dur-day    = 1*DIGIT "D"
-
 pub type Duration {
   Duration(
     sign: Sign,
@@ -41,16 +31,12 @@ pub fn parse(string) {
     [
       regexp.Match(
         submatches: [
-          // Full match
-          _,
-          // Year match
-          _,
-          // Month match
-          _,
+          _full_match,
+          _year_match,
+          _month_match,
           weeks,
           days,
-          // Time match
-          _,
+          _time_match,
           hours,
           minutes,
           seconds,

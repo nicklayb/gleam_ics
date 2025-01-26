@@ -23,10 +23,10 @@ pub fn decode(string) -> Result(DecodedProperty, String) {
     let #(left, value) = result
     left
     |> decode_name()
-    |> result.try(fn(result) {
+    |> result.map(fn(result) {
       let #(name, parameters) = result
 
-      Ok(DecodedProperty(name: name, parameters: parameters, value: value))
+      DecodedProperty(name: name, parameters: parameters, value: value)
     })
   })
 }
@@ -59,11 +59,12 @@ fn decode_parameters(
   case raw_parameters {
     [] -> Ok(dict)
     [parameter, ..rest] -> {
-      case decode_parameter(parameter) {
-        Ok(#(name, value)) ->
-          decode_parameters(rest, dict.insert(dict, name, value))
-        Error(error) -> Error(error)
-      }
+      parameter
+      |> decode_parameter()
+      |> result.try(fn(result) {
+        let #(name, value) = result
+        decode_parameters(rest, dict.insert(dict, name, value))
+      })
     }
   }
 }

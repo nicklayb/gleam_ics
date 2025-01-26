@@ -17,6 +17,11 @@ pub type Converter(a) {
   )
 }
 
+pub type ListResult {
+  Empty
+  Element(String, List(String))
+}
+
 pub fn update_object(converter: Converter(object), object: object) {
   Converter(..converter, object: object)
 }

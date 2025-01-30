@@ -3,6 +3,7 @@ import gleam/option.{type Option, None}
 import object.{Converter}
 import property.{DecodedProperty}
 import property/date.{type Date}
+import property/recurrence_rule.{type RecurrenceRule}
 
 //
 // ; the following are each REQUIRED,
@@ -16,18 +17,41 @@ import property/date.{type Date}
 // comment / rdate / rrule / tzname / x-prop
 //
 // )
+
+/// A "Saving" is used inside of a timezone. It defines how a timezone should
+/// calculate daylight saving. Inside a Timezone component, this structure is 
+/// used twice, once for Daylight saving time and once for Standard (i.e. not
+/// daylight).
+///
+/// ## Fields
+///
+/// - ̀`start` (from `DTSTART`): At which time this saving starts
+/// - `offset_from` (from ̀`TZOFFSETFROM`): Defines the offset prior to the timezone observance
+/// - `offset_to` (from ̀`TZOFFSETTO`): Defines the offset used in the timezone observance
+/// - `comment` (from `COMMENT`): Comments for the Saving object
+/// - `reccurence_rule` (from `RRULE`): Defines a recurrence for the saving
+///
 pub type Saving {
   Saving(
     start: Option(Date),
     offset_from: Option(Offset),
     offset_to: Option(Offset),
+    comment: Option(String),
+    reccurence_rule: Option(RecurrenceRule),
   )
 }
 
-pub fn new() {
-  Saving(start: None, offset_to: None, offset_from: None)
+fn new() {
+  Saving(
+    start: None,
+    offset_to: None,
+    offset_from: None,
+    reccurence_rule: None,
+    comment: None,
+  )
 }
 
+/// Saving converter
 pub fn converter() {
   Converter(object: new(), apply: apply_property)
 }

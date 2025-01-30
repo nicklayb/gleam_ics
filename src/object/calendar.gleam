@@ -52,6 +52,7 @@ fn put_timezone(calendar, timezone: Timezone) {
   )
 }
 
+/// Returns the converter for the Calendar object
 pub fn converter() {
   Converter(object: new(), apply: apply_property)
 }

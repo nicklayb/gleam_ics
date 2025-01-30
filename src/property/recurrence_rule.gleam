@@ -1,3 +1,4 @@
+import data_type.{type Sign}
 import gleam/option.{type Option}
 
 pub type Frequency {
@@ -27,7 +28,7 @@ pub type Weekday {
 }
 
 pub type ByWeekday {
-  ByWeekday(sign: Sign, ordinal_week, weekday: Weekday)
+  ByWeekday(sign: Sign, ordinal_week: Int, weekday: Weekday)
 }
 
 pub type Specifier {

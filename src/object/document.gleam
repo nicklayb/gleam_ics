@@ -2,10 +2,16 @@ import object.{Converter, Decodable}
 import object/calendar.{type Calendar}
 import property.{DecodedProperty}
 
+/// Root object of a document
+///
+/// ## Fields
+///
+/// - `calendars`: List of `VCALENDAR` child objects
 pub type Document {
   Document(calendars: List(Calendar))
 }
 
+/// Document converter
 pub fn converter() {
   Converter(object: new(), apply: apply_property)
 }

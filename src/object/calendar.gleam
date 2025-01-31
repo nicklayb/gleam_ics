@@ -8,12 +8,37 @@ import object/todo_item.{type Todo}
 import property.{DecodedProperty}
 import property/calendar_scale.{type CalendarScale}
 
+/// The calendar object is pretty much the "main" object of a
+/// calendar. Documents includes one or more calendar component
+/// which are then composed of a few types of objects.
+///
+/// ## Fields
+///
+/// - `version` (from `VERSION`): Version of the spec used in the document
+/// - `product_id` (from `PRODID`): Identifies the product that produced the document
+/// - `method` (from `METHOD`): iCalendar object method
+/// - `scale` (from `CALSCALE`): Calendar scale, defaults to GREGORIAN
+/// - `events`: List of all the child `VEVENT` objects
+/// - `todos`: List of all the child `VTODO` objects
+/// - `timezones`: List of all the child `VTIMEZONE` objects
+///
+/// ## Missing fields
+///
+/// This structure is not completed yet, support for the following properties
+/// is still missing.
+///
+/// - List of `VFREEBUSY` child objects
+/// - List of `VALARM` child objects
+/// - List of `VJOURNAL` child objects
+/// - Iana properties
+/// - X properties
+///
 pub type Calendar {
   Calendar(
     version: Option(String),
     product_id: Option(String),
     method: Option(iana.IanaToken),
-    scale: Option(CalendarScale),
+    scale: CalendarScale,
     timezones: Dict(String, Timezone),
     events: List(Event),
     todos: List(Todo),
@@ -25,7 +50,7 @@ fn new() {
     version: None,
     product_id: None,
     method: None,
-    scale: None,
+    scale: calendar_scale.Gregorian,
     events: [],
     timezones: dict.new(),
     todos: [],
@@ -52,7 +77,7 @@ fn put_timezone(calendar, timezone: Timezone) {
   )
 }
 
-/// Returns the converter for the Calendar object
+/// Calendar converter
 pub fn converter() {
   Converter(object: new(), apply: apply_property)
 }

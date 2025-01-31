@@ -31,6 +31,17 @@ import property/recurrence_rule.{type RecurrenceRule}
 /// - `comment` (from `COMMENT`): Comments for the Saving object
 /// - `reccurence_rule` (from `RRULE`): Defines a recurrence for the saving
 ///
+///
+/// ### Missing fields
+///
+/// This structure is not completed yet, support for the following properties
+/// is still missing.
+///
+/// - `RDATE`
+/// - `TZNAME`
+/// - Iana properties
+/// - X properties
+///
 pub type Saving {
   Saving(
     start: Option(Date),
